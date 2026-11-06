@@ -5,17 +5,16 @@ effect. It starts by itself, clicks add new life, and the tick rate is adjustabl
 
 ## The target look
 
-Measured from the reference screenshot. Colours are judged by eye from enlarged
-crops, so fine-tune them side by side in milestone 2.
+Measured from the reference screenshot. Colours are sampled from its pixels.
 
 | Property | Value |
 | --- | --- |
-| Background | charcoal, about `#202124` |
+| Background | `#22242a` |
 | Cell size | 16 screenshot px, about **8 CSS px** assuming a 2x display |
 | Cell shape | hard square, no rounding, no glow |
-| Cell colour | near-white, about `#f1f5f9` |
-| Between touching cells | faint blue-white seam, about `#e4edf7`, not a dark gap |
-| Settled vs active cells | the still block looks whiter than the moving cluster, so brightness may follow cell age (an inference, see milestone 5) |
+| Cell colour | `#f3f8fa` |
+| Between touching cells | faint blue-white seam, `#e8f2fa`, not a dark gap |
+| Settled vs active cells | the still block is slightly whiter, `#fbfdfe`, so brightness may follow cell age (an inference, see milestone 5) |
 
 ## Behaviour
 
@@ -87,7 +86,7 @@ without changes.
   backgrounded tab can't trigger a burst of catch-up ticks.
 - **Drawing:** redraw only after a tick or a click. Cells are positioned on whole
   device pixels so edges stay sharp. Live cells are filled in two passes: the seam
-  colour at full size, then the cell colour inset by 1 device px.
+  colour at full size, then the cell colour 1 CSS px smaller.
 - **Resize:** copy the existing cells into the new grid rather than resetting.
 
 ## Milestones
