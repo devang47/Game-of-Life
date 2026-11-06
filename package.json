@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build --base=./",
     "preview": "vite preview",
     "test": "node --test \"src/*.test.ts\""
   },

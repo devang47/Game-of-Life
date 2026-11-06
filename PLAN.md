@@ -14,7 +14,7 @@ Measured from the reference screenshot. Colours are sampled from its pixels.
 | Cell shape | hard square, no rounding, no glow |
 | Cell colour | `#f3f8fa` |
 | Between touching cells | faint blue-white seam, `#e8f2fa`, not a dark gap |
-| Settled vs active cells | the still block is slightly whiter, `#fbfdfe`, so brightness may follow cell age (an inference, see milestone 5) |
+| Settled vs active cells | the still block is slightly whiter, `#fbfdfe`. Not reproduced: the difference is about 3% |
 
 ## Behaviour
 
@@ -92,6 +92,8 @@ without changes.
 
 ## Milestones
 
+Milestones 1 to 4 are done. In milestone 5, only the deployment is still to do.
+
 **1. Engine.** `life.ts` plus tests. Done when `node --test` passes on:
 - a lone cell dying
 - a block staying still
@@ -113,14 +115,15 @@ stay out of the way. Clicks on it must not seed cells. Done when:
 - it works by keyboard and has a label
 - with `prefers-reduced-motion`, the default drops to 2 ticks per second
 
-**5. Polish and ship.** Tune the colours, and add age-based brightness only if the
-side-by-side shows it matters, since it needs a second array. Then deploy.
+**5. Polish and ship.** Tune the colours, and make the build work from any URL
+path. Then deploy.
 
 ## Left out until there's a reason
 
 | Skipped | Add it when |
 | --- | --- |
 | Drag to paint cells | Clicking alone feels limited once it's playable |
+| Brightness that follows cell age | A 3% difference starts to matter; it needs a second array |
 | Pause, clear, step buttons | You want the page to be a toy as well as an effect |
 | Pattern picker, rule editor | Probably never for a background |
 | Worker, WebGL, Hashlife | Milestone 2's tick measurement misses its budget |
@@ -128,4 +131,4 @@ side-by-side shows it matters, since it needs a second array. Then deploy.
 
 ## Open questions
 
-1. **Hosting:** not needed until milestone 5.
+1. **Hosting:** where should it be deployed? The build is static and works from any URL path.
