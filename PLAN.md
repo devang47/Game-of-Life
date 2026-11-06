@@ -56,8 +56,12 @@ and a dead background is the main way this effect could fail.
 
 Cells run off the edge of the screen rather than wrapping around, which matches
 the reference, where a cluster is cut off at the left edge. The grid extends 16
-hidden cells past each side of the viewport, and the outermost ring is cleared
-every tick, so gliders leave for good and leave no debris at the boundary.
+hidden cells past each side of the viewport.
+
+A dead boundary alone isn't enough, because it acts as a wall: a test showed a
+glider hitting it turning into a stable block. So the outer 8 hidden cells are
+wiped every 8 ticks. Nothing in Life moves faster than 1 cell per tick, so nothing
+can reach the wall between wipes, and gliders leave for good.
 
 ## Architecture
 
