@@ -92,22 +92,39 @@ test("a diehard vanishes at generation 130", () => {
 test("settled detects repeating grids but not moving ones", () => {
   const still = createGrid(9, 9);
   place(still, BLOCK, 4, 4);
-  steps(still, 6);
-  assert.equal(still.settled, false, "needs a full 6-tick history first");
+  steps(still, 24);
+  assert.equal(still.settled, false, "needs 24 ticks of history first");
   step(still);
   assert.equal(still.settled, true);
 
   const blinker = createGrid(9, 9);
   place(blinker, BLINKER, 3, 4);
-  steps(blinker, 7);
+  steps(blinker, 25);
   assert.equal(blinker.settled, true);
 
-  const glider = createGrid(60, 60);
+  const glider = createGrid(300, 300);
   place(glider, GLIDER, 5, 5);
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 400; i++) {
     step(glider);
     assert.equal(glider.settled, false);
   }
+});
+
+test("settled detects a period-15 oscillator", () => {
+  const g = createGrid(40, 40);
+  place(g, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((x) => [x, 0] as const), 15, 20);
+  steps(g, 60);
+  assert.equal(g.settled, false, "period 15 doesn't divide 24");
+  steps(g, 130);
+  assert.equal(g.settled, true);
+});
+
+test("stamping clears settled straight away", () => {
+  const g = createGrid(20, 20);
+  steps(g, 25);
+  assert.equal(g.settled, true);
+  stamp(g, GLIDER, 10, 10);
+  assert.equal(g.settled, false);
 });
 
 test("spaceships leave through every edge without leaving debris", () => {

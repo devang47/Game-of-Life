@@ -44,9 +44,10 @@ mix, with a random rotation and flip, always with a live cell on the clicked cel
 Left alone, Life settles into static blocks and blinkers within a few minutes,
 and a dead background is the main way this effect could fail.
 
-- **Detect:** hash the grid every tick and compare with the hash from 6 ticks ago.
-  A match means every pattern on screen has period 1, 2, 3 or 6, which covers
-  nearly all the debris Life leaves behind.
+- **Detect:** hash the grid every tick and compare with the hashes from 24 and 120
+  ticks ago. 24 ticks catches periods 1, 2, 3, 4, 6, 8 and 12 quickly, including
+  anything locked to the 8-tick edge wipe. 120 ticks also catches periods 5, 10
+  and 15, so a pentadecathlon can't keep the page frozen forever.
 - **Respond:** 3 seconds after settling, drop one new seed at a random spot. It
   collides with the debris and restarts activity. This only begins once the page
   has had its first click or its 3 automatic seeds, so the blank start stays blank.

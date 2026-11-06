@@ -7,6 +7,7 @@ const CELL_COLOR = "#f3f8fa";
 const SEAM_COLOR = "#e8f2fa";
 const AUTO_SEEDS = 3;
 const AUTO_SEED_WINDOW = 5000; // ms
+const KEEP_ALIVE_DELAY = 3000; // ms the grid stays settled before a new seed
 const MAX_FRAME_TIME = 250; // ms, stops a backgrounded tab bursting on return
 
 const canvas = document.querySelector("canvas")!;
@@ -16,6 +17,8 @@ const grid = createGrid(MARGIN * 2 + 1, MARGIN * 2 + 1, EDGE);
 let cellPx = CELL_SIZE;
 let ticksPerSecond = 10;
 let autoSeedsDropped = 0;
+let clicked = false;
+let settledAt: number | null = null;
 let lastFrame = performance.now();
 const startTime = lastFrame;
 let elapsed = 0;
@@ -34,16 +37,17 @@ function fit(): void {
   dirty = true;
 }
 
+function dropSeed(x: number, y: number): void {
+  stamp(grid, SEEDS[Math.floor(Math.random() * SEEDS.length)]!, x, y);
+  dirty = true;
+}
+
 function dropRandomSeed(): void {
-  const pattern = SEEDS[Math.floor(Math.random() * SEEDS.length)]!;
   const inset = () => 0.1 + Math.random() * 0.8; // keeps it clear of the screen edge
-  stamp(
-    grid,
-    pattern,
+  dropSeed(
     MARGIN + Math.floor((grid.cols - MARGIN * 2) * inset()),
     MARGIN + Math.floor((grid.rows - MARGIN * 2) * inset()),
   );
-  dirty = true;
 }
 
 function draw(): void {
@@ -76,9 +80,15 @@ function frame(now: number): void {
   }
 
   const nextAutoSeedAt = ((autoSeedsDropped + 1) * AUTO_SEED_WINDOW) / AUTO_SEEDS;
-  if (autoSeedsDropped < AUTO_SEEDS && now - startTime >= nextAutoSeedAt) {
+  if (!clicked && autoSeedsDropped < AUTO_SEEDS && now - startTime >= nextAutoSeedAt) {
     dropRandomSeed();
     autoSeedsDropped++;
+  }
+
+  settledAt = grid.settled ? (settledAt ?? now) : null;
+  const started = clicked || autoSeedsDropped === AUTO_SEEDS;
+  if (started && settledAt !== null && now - settledAt >= KEEP_ALIVE_DELAY) {
+    dropRandomSeed();
   }
 
   if (dirty) {
@@ -87,6 +97,16 @@ function frame(now: number): void {
   }
   requestAnimationFrame(frame);
 }
+
+canvas.addEventListener("pointerdown", (event) => {
+  if (event.button !== 0) return;
+  clicked = true;
+  const scale = canvas.width / canvas.clientWidth;
+  dropSeed(
+    Math.floor((event.offsetX * scale) / cellPx) + MARGIN,
+    Math.floor((event.offsetY * scale) / cellPx) + MARGIN,
+  );
+});
 
 addEventListener("resize", fit);
 fit();

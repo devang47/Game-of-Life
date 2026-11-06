@@ -7,9 +7,11 @@ export type Grid = {
   cells: Uint8Array;
   next: Uint8Array;
   generation: number;
-  settled: boolean; // true when the grid repeats with a period of 1, 2, 3 or 6
+  settled: boolean; // true once the grid is only repeating itself
   history: Int32Array;
 };
+
+const HISTORY = 120;
 
 export type Pattern = readonly (readonly [x: number, y: number])[];
 
@@ -36,7 +38,7 @@ export function createGrid(cols: number, rows: number, edge = 0): Grid {
     next: new Uint8Array(cols * rows),
     generation: 0,
     settled: false,
-    history: new Int32Array(6),
+    history: new Int32Array(HISTORY),
   };
 }
 
@@ -76,9 +78,11 @@ export function step(g: Grid): void {
   g.cells = next;
   g.next = cells;
 
-  // Comparing with the hash from 6 ticks ago catches periods 1, 2, 3 and 6.
-  const slot = g.generation % 6;
-  g.settled = g.history[slot] === hash;
+  // 24 ticks back catches periods 1, 2, 3, 4, 6, 8 and 12 quickly, including
+  // anything locked to the edge wipe. 120 ticks back also catches 5, 10 and 15.
+  const slot = g.generation % HISTORY;
+  g.settled =
+    g.history[slot] === hash || g.history[(slot + HISTORY - 24) % HISTORY] === hash;
   g.history[slot] = hash;
   g.generation++;
 }
