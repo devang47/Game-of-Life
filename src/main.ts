@@ -12,10 +12,12 @@ const MAX_FRAME_TIME = 250; // ms, stops a backgrounded tab bursting on return
 
 const canvas = document.querySelector("canvas")!;
 const ctx = canvas.getContext("2d")!;
+const slider = document.querySelector<HTMLInputElement>("#speed")!;
+const readout = document.querySelector("output")!;
 const grid = createGrid(MARGIN * 2 + 1, MARGIN * 2 + 1, EDGE);
 
 let cellPx = CELL_SIZE;
-let ticksPerSecond = 10;
+let ticksPerSecond = 0;
 let autoSeedsDropped = 0;
 let clicked = false;
 let settledAt: number | null = null;
@@ -35,6 +37,14 @@ function fit(): void {
     Math.ceil(canvas.height / cellPx) + MARGIN * 2,
   );
   dirty = true;
+}
+
+function setSpeed(value: number): void {
+  ticksPerSecond = value;
+  elapsed = 0; // time saved up at a slow speed would burst out at a fast one
+  slider.value = String(value);
+  slider.setAttribute("aria-valuetext", `${value} ticks per second`);
+  readout.textContent = `${value}/s`;
 }
 
 function dropSeed(x: number, y: number): void {
@@ -107,6 +117,9 @@ canvas.addEventListener("pointerdown", (event) => {
     Math.floor((event.offsetY * scale) / cellPx) + MARGIN,
   );
 });
+
+slider.addEventListener("input", () => setSpeed(slider.valueAsNumber));
+setSpeed(matchMedia("(prefers-reduced-motion: reduce)").matches ? 2 : 10);
 
 addEventListener("resize", fit);
 fit();
