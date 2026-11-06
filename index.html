@@ -12,7 +12,10 @@
       body {
         margin: 0;
         height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
         background: #22242a;
+        user-select: none;
       }
       canvas {
         position: fixed;
@@ -21,7 +24,7 @@
         height: 100%;
         display: block;
         cursor: crosshair;
-        touch-action: manipulation;
+        touch-action: pinch-zoom;
       }
       .speed {
         position: fixed;
@@ -58,7 +61,7 @@
     </style>
   </head>
   <body>
-    <canvas role="img" aria-label="Conway's Game of Life. Click anywhere to add cells."></canvas>
+    <canvas role="img" aria-label="Conway's Game of Life. Click to add cells, scroll or press plus and minus to zoom, drag or press arrow keys to move."></canvas>
     <div class="speed">
       <label for="speed">Speed</label>
       <input id="speed" type="range" min="1" max="60" step="1" />

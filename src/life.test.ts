@@ -8,7 +8,6 @@ import {
   R_PENTOMINO,
   SEEDS,
   createGrid,
-  resize,
   stamp,
   step,
   type Grid,
@@ -119,6 +118,21 @@ test("settled detects a period-15 oscillator", () => {
   assert.equal(g.settled, true);
 });
 
+test("settled only watches the view", () => {
+  const g = createGrid(300, 300);
+  place(g, BLOCK, 20, 20);
+  place(g, GLIDER, 100, 100); // keeps moving, but outside the view
+  const view = { x0: 10, y0: 10, x1: 40, y1: 40 };
+  for (let i = 0; i < 25; i++) step(g, view);
+  assert.equal(g.settled, true);
+
+  const whole = createGrid(300, 300);
+  place(whole, BLOCK, 20, 20);
+  place(whole, GLIDER, 100, 100);
+  steps(whole, 25);
+  assert.equal(whole.settled, false);
+});
+
 test("stamping clears settled straight away", () => {
   const g = createGrid(20, 20);
   steps(g, 25);
@@ -167,18 +181,4 @@ test("stamp never writes to the outer ring, even at a corner", () => {
       assert.equal(g.cells[index], 0);
     }
   }
-});
-
-test("resize keeps cells in place and the outer ring dead", () => {
-  const g = createGrid(20, 20);
-  place(g, BLOCK, 3, 3);
-  place(g, BLOCK, 17, 17);
-  resize(g, 30, 25);
-  assert.equal(g.cells[3 * 30 + 3], 1);
-  assert.equal(population(g), 8);
-
-  resize(g, 10, 10);
-  assert.deepEqual(liveCells(g), [[3, 3], [4, 3], [3, 4], [4, 4]]);
-  step(g);
-  assert.equal(population(g), 4);
 });

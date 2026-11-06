@@ -15,6 +15,9 @@ const HISTORY = 120;
 
 export type Pattern = readonly (readonly [x: number, y: number])[];
 
+// The part of the grid that `settled` watches. x1 and y1 are exclusive.
+export type View = { x0: number; y0: number; x1: number; y1: number };
+
 const parse = (art: string[]): Pattern =>
   art.flatMap((row, y) =>
     [...row].flatMap((c, x) => (c === "X" ? [[x, y] as const] : [])),
@@ -58,10 +61,12 @@ function clearEdges({ cols, rows, cells, edge }: Grid): void {
 // a wall: a glider hitting it turns into a stable block. So the edge band is wiped
 // every `edge` ticks. Nothing moves faster than 1 cell per tick, so nothing can
 // cross the band and reach the wall between wipes.
-export function step(g: Grid): void {
+export function step(
+  g: Grid,
+  view: View = { x0: 0, y0: 0, x1: g.cols, y1: g.rows },
+): void {
   const { cols, rows, cells, next } = g;
   if (g.edge && g.generation % g.edge === 0) clearEdges(g);
-  let hash = 0x811c9dc5 | 0;
   for (let y = 1; y < rows - 1; y++) {
     const row = y * cols;
     for (let x = 1; x < cols - 1; x++) {
@@ -70,13 +75,19 @@ export function step(g: Grid): void {
         cells[i - cols - 1]! + cells[i - cols]! + cells[i - cols + 1]! +
         cells[i - 1]! + cells[i + 1]! +
         cells[i + cols - 1]! + cells[i + cols]! + cells[i + cols + 1]!;
-      const alive = n === 3 || (n === 2 && cells[i] === 1) ? 1 : 0;
-      next[i] = alive;
-      if (alive) hash = Math.imul(hash ^ i, 16777619);
+      next[i] = n === 3 || (n === 2 && cells[i] === 1) ? 1 : 0;
     }
   }
   g.cells = next;
   g.next = cells;
+
+  let hash = 0x811c9dc5 | 0;
+  for (let y = view.y0; y < view.y1; y++) {
+    const row = y * cols;
+    for (let i = row + view.x0; i < row + view.x1; i++) {
+      if (next[i]) hash = Math.imul(hash ^ i, 16777619);
+    }
+  }
 
   // 24 ticks back catches periods 1, 2, 3, 4, 6, 8 and 12 quickly, including
   // anything locked to the edge wipe. 120 ticks back also catches 5, 10 and 15.
@@ -120,20 +131,4 @@ export function stamp(
     }
   }
   g.settled = false;
-}
-
-// Keeps every cell at the same top-left position.
-export function resize(g: Grid, cols: number, rows: number): void {
-  const cells = new Uint8Array(cols * rows);
-  for (let y = 1; y < Math.min(rows, g.rows) - 1; y++) {
-    for (let x = 1; x < Math.min(cols, g.cols) - 1; x++) {
-      cells[y * cols + x] = g.cells[y * g.cols + x]!;
-    }
-  }
-  g.cols = cols;
-  g.rows = rows;
-  g.cells = cells;
-  g.next = new Uint8Array(cols * rows);
-  g.settled = false;
-  g.history.fill(0);
 }
